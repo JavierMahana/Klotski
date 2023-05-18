@@ -1,0 +1,3 @@
+C:/Users/Javier/Documentos/GitHub/Klotski/Klotski/cmake-build-debug/CMakeFiles/Klotski.dir
+C:/Users/Javier/Documentos/GitHub/Klotski/Klotski/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Javier/Documentos/GitHub/Klotski/Klotski/cmake-build-debug/CMakeFiles/rebuild_cache.dir
