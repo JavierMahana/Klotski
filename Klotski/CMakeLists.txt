@@ -3,4 +3,4 @@ project(Klotski)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(Klotski main.cpp)
+add_executable(Klotski main.cpp Klotsky.cpp Klotsky.h)
