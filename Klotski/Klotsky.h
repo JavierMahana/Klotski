@@ -78,17 +78,22 @@ public:
     const char target_char = 'X';
 
 
-    std::bitset<25> getFull () const { return bits_1X1_A | bits_1X1_B | bits_1X1_C | bits_1X1_D | bits_1X2 | bits_2X1_A | bits_2X1_B | bits_2X1_C | bits_2X1_D | bits_2X2;}
+
+
+    std::bitset<25> getFull () const { return (bits_1X1_A | bits_1X1_B | bits_1X1_C | bits_1X1_D | bits_1X2 | bits_2X1_A | bits_2X1_B | bits_2X1_C | bits_2X1_D | bits_2X2) & BOARD_MASK;}
     std::bitset<25> getEmpty () const {return getFull().flip() & BOARD_MASK;};
 
     void addBits(std::bitset<25>bits, Piece pieceToAdd);
-    void removeBitsInAllBitsets(std::bitset<25> bits);
+    void removeBits(std::bitset<25> bits, Klotsky::Piece pieceToRemove);
 
 
     std::vector<Klotsky> generateAllLegalMoves();
     std::vector<Klotsky> generatePieceMoves(std::bitset<25> piece, Piece pieceType);
 
    //the difference in safe shift and unsafe is that the safe one removes the bits that are outside the board.
+
+    std::string getStringOfType(Piece pieceType);
+    std::string directionToString(Direction direction);
 
     std::bitset<25> shiftUpUnsafe(std::bitset<25> bitset) const;
     std::bitset<25> shiftDownUnsafe(std::bitset<25> bitset) const;
@@ -105,7 +110,7 @@ public:
 
     void print() const;
     void printTarget() const;
-    void printO() const;
+    void printO(bool show0, bool showA) const;
 
 };
 

@@ -3,6 +3,53 @@
 //
 
 #include "Klotsky.h"
+
+
+Klotsky::Klotsky(const std::bitset<25> &bits1X1A, const std::bitset<25> &bits1X1B, const std::bitset<25> &bits1X1C,
+                 const std::bitset<25> &bits1X1D, const std::bitset<25> &bits1X2, const std::bitset<25> &bits2X1A,
+                 const std::bitset<25> &bits2X1B, const std::bitset<25> &bits2X1C, const std::bitset<25> &bits2X1D,
+                 const std::bitset<25> &bits2X2) : bits_1X1_A(bits1X1A), bits_1X1_B(bits1X1B), bits_1X1_C(bits1X1C),
+                                                   bits_1X1_D(bits1X1D), bits_1X2(bits1X2), bits_2X1_A(bits2X1A),
+                                                   bits_2X1_B(bits2X1B), bits_2X1_C(bits2X1C), bits_2X1_D(bits2X1D),
+                                                   bits_2X2(bits2X2) {
+    parent = nullptr;
+}
+
+Klotsky::Klotsky(const Klotsky& other) {
+
+    bits_1X1_A = other.bits_1X1_A;
+    bits_1X1_B = other.bits_1X1_B;
+    bits_1X1_C = other.bits_1X1_C;
+    bits_1X1_D = other.bits_1X1_D;
+    bits_1X2 = other.bits_1X2;
+    bits_2X1_A = other.bits_2X1_A;
+    bits_2X1_B = other.bits_2X1_B;
+    bits_2X1_C = other.bits_2X1_C;
+    bits_2X1_D = other.bits_2X1_D;
+    bits_2X2 = other.bits_2X2;
+    parent = nullptr;
+}
+
+Klotsky& Klotsky::operator=(const Klotsky& other) {
+    if (this == &other) {
+        return *this; // Self-assignment check
+    }
+
+    // Perform member-wise assignment
+    bits_1X1_A = other.bits_1X1_A;
+    bits_1X1_B = other.bits_1X1_B;
+    bits_1X1_C = other.bits_1X1_C;
+    bits_1X1_D = other.bits_1X1_D;
+    bits_1X2 = other.bits_1X2;
+    bits_2X1_A = other.bits_2X1_A;
+    bits_2X1_B = other.bits_2X1_B;
+    bits_2X1_C = other.bits_2X1_C;
+    bits_2X1_D = other.bits_2X1_D;
+    bits_2X2 = other.bits_2X2;
+
+    return *this;
+}
+
 void Klotsky::print() const {
     std::cout << " Klotsky Board " << std::endl;
     std::cout << "   A B C D " <<std::endl;
@@ -45,7 +92,44 @@ void Klotsky::print() const {
         }
     }
 }
+void Klotsky::printO(bool show0, bool showA) const {
 
+    std::cout << " Target Board " << std::endl;
+    std::cout << "   A B C D " <<std::endl;
+    std::cout << "   _ _ _ _ " <<std::endl;
+    int row = 1;
+    int j = 0;
+
+    // Tablero Reverso
+    for (int i = 24; i >= 0; --i) {
+
+        if(j==0){
+            std::cout<< row << "| ";
+        }
+        if(i%5 != 0){
+
+
+            if(show0 && bits_2X2[i] != 0){
+                std::cout << _2x2_char;
+            }else if(showA && bits_1X1_A[i] != 0 || bits_1X1_B[i] != 0 || bits_1X1_C[i] != 0 || bits_1X1_D[i] != 0 ){
+                std::cout << _1x1_char;
+            }
+            else{
+                std::cout << " ";
+            }
+
+            std::cout << " ";
+        }
+
+        j++;
+        if(j==5){
+            j = 0;
+            row++;
+            std::cout<<std::endl;
+        }
+
+    }
+}
 void Klotsky::printTarget() const {
     std::cout << " Target Board " << std::endl;
     std::cout << "   A B C D " <<std::endl;
@@ -114,50 +198,6 @@ std::bitset<25> Klotsky::shiftDirection(std::bitset<25> bitset, Klotsky::Directi
 
 }
 
-Klotsky::Klotsky(const std::bitset<25> &bits1X1A, const std::bitset<25> &bits1X1B, const std::bitset<25> &bits1X1C,
-                 const std::bitset<25> &bits1X1D, const std::bitset<25> &bits1X2, const std::bitset<25> &bits2X1A,
-                 const std::bitset<25> &bits2X1B, const std::bitset<25> &bits2X1C, const std::bitset<25> &bits2X1D,
-                 const std::bitset<25> &bits2X2) : bits_1X1_A(bits1X1A), bits_1X1_B(bits1X1B), bits_1X1_C(bits1X1C),
-                                                   bits_1X1_D(bits1X1D), bits_1X2(bits1X2), bits_2X1_A(bits2X1A),
-                                                   bits_2X1_B(bits2X1B), bits_2X1_C(bits2X1C), bits_2X1_D(bits2X1D),
-                                                   bits_2X2(bits2X2) {
-    parent = nullptr;
-}
-
-Klotsky::Klotsky(const Klotsky& other) {
-
-    bits_1X1_A = other.bits_1X1_A;
-    bits_1X1_B = other.bits_1X1_B;
-    bits_1X1_C = other.bits_1X1_C;
-    bits_1X1_D = other.bits_1X1_D;
-    bits_1X2 = other.bits_1X2;
-    bits_2X1_A = other.bits_2X1_A;
-    bits_2X1_B = other.bits_2X1_B;
-    bits_2X1_C = other.bits_2X1_C;
-    bits_2X1_D = other.bits_2X1_D;
-    bits_2X2 = other.bits_2X2;
-}
-
-
-Klotsky& Klotsky::operator=(const Klotsky& other) {
-    if (this == &other) {
-        return *this; // Self-assignment check
-    }
-
-    // Perform member-wise assignment
-    bits_1X1_A = other.bits_1X1_A;
-    bits_1X1_B = other.bits_1X1_B;
-    bits_1X1_C = other.bits_1X1_C;
-    bits_1X1_D = other.bits_1X1_D;
-    bits_1X2 = other.bits_1X2;
-    bits_2X1_A = other.bits_2X1_A;
-    bits_2X1_B = other.bits_2X1_B;
-    bits_2X1_C = other.bits_2X1_C;
-    bits_2X1_D = other.bits_2X1_D;
-    bits_2X2 = other.bits_2X2;
-
-    return *this;
-}
 
 std::bitset<25> Klotsky::shiftDirectionUnsafe(std::bitset<25> bitset, Klotsky::Direction direction) const {
     switch (direction)
@@ -197,21 +237,21 @@ std::vector<Klotsky> Klotsky::generatePieceMoves(std::bitset<25> piece, Klotsky:
     //we create a copy to be modified.
     Klotsky boardWithoutPiece = *this;
     //first we remove the piece bits, so it become empty space.
-    boardWithoutPiece.removeBitsInAllBitsets(piece);
+    boardWithoutPiece.removeBits(piece, pieceType);
 
-    std::bitset<25> shiftedPiece = piece;
+    //std::bitset<25> shiftedPiece = piece;
     std::vector<Klotsky> generatedMoves;
     for (int i = 0; i < 4; ++i) {
         auto direction = static_cast<Direction>(i);
+        std::bitset<25> shiftedPiece = piece;
         //now we add moves in the direction until the piece gets out of bounds or there is another piece blocking the move.
-        int j= 0;
         while (true)
         {
             shiftedPiece = shiftDirectionUnsafe(shiftedPiece, direction);
             //we check if the shifted piece moves to an empty space.
-            if((shiftedPiece & boardWithoutPiece.getEmpty()) == shiftedPiece)
+            if((shiftedPiece & boardWithoutPiece.getEmpty()) == shiftedPiece && (shiftedPiece.count() == piece.count()))
             {
-                std::cout << "looping... "<<  j  << std::endl;
+                shiftedPiece &= BOARD_MASK;
                 Klotsky newMove = boardWithoutPiece;
                 newMove.addBits(shiftedPiece, pieceType);
                 //the move will assign its parent
@@ -222,7 +262,6 @@ std::vector<Klotsky> Klotsky::generatePieceMoves(std::bitset<25> piece, Klotsky:
             {
                 break;
             }
-            j++;
         }
     }
     return generatedMoves;
@@ -280,23 +319,41 @@ std::vector<Klotsky> Klotsky::generateAllLegalMoves() {
     return generatedMoves;
 }
 
-void Klotsky::removeBitsInAllBitsets(std::bitset<25> bits) {
-    bits_1X1_A ^= bits;
-    bits_1X1_B ^= bits;
-    bits_1X1_C ^= bits;
-    bits_1X1_D ^= bits;
+void Klotsky::removeBits(std::bitset<25> bits, Klotsky::Piece pieceToRemove) {
 
-    bits_1X2 ^= bits;
+    switch (pieceToRemove) {
+        case Piece::A_1X1:
+            bits_1X1_A &= ~bits;
+            break;
+        case Piece::B_1X1:
+            bits_1X1_B &= ~bits;
+            break;
+        case Piece::C_1X1:
+            bits_1X1_C &= ~bits;
+            break;
+        case Piece::D_1X1:
+            bits_1X1_D &= ~bits;
+            break;
+        case Piece::A_1X2:
+            bits_1X2 &= ~bits;
+            break;
+        case Piece::A_2X1:
+            bits_2X1_A &= ~bits;
+            break;
+        case Piece::B_2X1:
+            bits_2X1_B &= ~bits;
+            break;
+        case Piece::C_2X1:
+            bits_2X1_C &= ~bits;
+            break;
+        case Piece::D_2X1:
+            bits_2X1_D &= ~bits;
+            break;
+        case Piece::A_2X2:
+            bits_2X2 &= ~bits;
+            break;
+    }
 
-    bits_2X1_A ^= bits;
-    bits_2X1_B ^= bits;
-    bits_2X1_C ^= bits;
-    bits_2X1_D ^= bits;
-
-    bits_2X2 ^= bits;
-
-    // fix!?
-    //bits ^= bits_2X2;
 }
 
 void Klotsky::addBits(std::bitset<25> bits, Klotsky::Piece pieceToAdd) {
@@ -335,39 +392,58 @@ void Klotsky::addBits(std::bitset<25> bits, Klotsky::Piece pieceToAdd) {
     }
 }
 
-void Klotsky::printO() const {
-
-    std::cout << " Target Board " << std::endl;
-    std::cout << "   A B C D " <<std::endl;
-    std::cout << "   _ _ _ _ " <<std::endl;
-    int row = 1;
-    int j = 0;
-
-    // Tablero Reverso
-    for (int i = 24; i >= 0; --i) {
-
-        if(j==0){
-            std::cout<< row << "| ";
-        }
-        if(i%5 != 0){
-
-            if(bits_2X2[i] != 0){
-                std::cout << " ";
-                std::cout << _2x2_char;
-            }
-            else{
-                std::cout << " ";
-            }
-        }
-
-        j++;
-        if(j==5){
-            j = 0;
-            row++;
-            std::cout<<std::endl;
-        }
-
+std::string Klotsky::getStringOfType(Klotsky::Piece pieceType) {
+    std::string pieceTypeStr;
+    switch (pieceType) {
+        case Piece::A_1X1:
+            pieceTypeStr = "A_1X1";
+            break;
+        case Piece::B_1X1:
+            pieceTypeStr = "B_1X1";
+            break;
+        case Piece::C_1X1:
+            pieceTypeStr = "C_1X1";
+            break;
+        case Piece::D_1X1:
+            pieceTypeStr = "D_1X1";
+            break;
+        case Piece::A_1X2:
+            pieceTypeStr = "A_1X2";
+            break;
+        case Piece::A_2X1:
+            pieceTypeStr = "A_2X1";
+            break;
+        case Piece::B_2X1:
+            pieceTypeStr = "B_2X1";
+            break;
+        case Piece::C_2X1:
+            pieceTypeStr = "C_2X1";
+            break;
+        case Piece::D_2X1:
+            pieceTypeStr = "D_2X1";
+            break;
+        case Piece::A_2X2:
+            pieceTypeStr = "A_2X2";
+            break;
+        default:
+            pieceTypeStr = "Unknown";
+            break;
     }
+
+    return pieceTypeStr;
 }
 
-
+std::string Klotsky::directionToString(Klotsky::Direction direction) {
+    switch (direction) {
+        case Direction::LEFT:
+            return "LEFT";
+        case Direction::RIGHT:
+            return "RIGHT";
+        case Direction::UP:
+            return "UP";
+        case Direction::DOWN:
+            return "DOWN";
+        default:
+            return "Unknown";
+    }
+}

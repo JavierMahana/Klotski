@@ -62,8 +62,8 @@ int main() {
     auto allMoves = k.generateAllLegalMoves();
 
     for (const auto& move : allMoves) {
-        //move.print();
-        move.printO();
+        move.print();
+        //move.printO(false, true);
     }
 
 
