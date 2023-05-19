@@ -4,9 +4,6 @@
 
 #include "Klotsky.h"
 void Klotsky::print() const {
-    // bitsets are usually printed according to the way in which the byte values are stored in memory
-    // therefore to print our visual representation we turn it into a string
-    std::string bits_str = getFull().to_string();
     std::cout << " Klotsky Board " << std::endl;
     std::cout << "   A B C D " <<std::endl;
     std::cout << "   _ _ _ _ " <<std::endl;
@@ -23,16 +20,16 @@ void Klotsky::print() const {
 
             std::cout << " ";
 
-            if(getFull()[i] != 0 && bits_2X2[i] != 0){
+            if(bits_2X2[i] != 0){
                 std::cout << _2x2_char;
             }
-            else if((getFull()[i] != 0 && bits_1X2[i] != 0)){
+            else if(bits_1X2[i] != 0){
                 std::cout << _1x2_char;
             }
-            else if((getFull()[i] != 0 && bits_1X1_A[i] != 0) || (getFull()[i] != 0 && bits_1X1_B[i] != 0) || (getFull()[i] != 0 && bits_1X1_C[i] != 0) || (getFull()[i] != 0 && bits_1X1_D[i] != 0)){
+            else if(bits_1X1_A[i] != 0 || bits_1X1_B[i] != 0 || bits_1X1_C[i] != 0 || bits_1X1_D[i] != 0){
                 std::cout << _1x1_char;
             }
-            else if((getFull()[i] != 0 && bits_2X1_A[i] != 0) || (getFull()[i] != 0 && bits_2X1_B[i] != 0) || (getFull()[i] != 0 && bits_2X1_C[i] != 0) || (getFull()[i] != 0 && bits_2X1_D[i] != 0)){
+            else if(bits_2X1_A[i] != 0 || bits_2X1_B[i] != 0 || bits_2X1_C[i] != 0 || bits_2X1_D[i] != 0){
                 std::cout << _2x1_char;
             }
             else{
@@ -49,13 +46,7 @@ void Klotsky::print() const {
     }
 }
 
-
-
 void Klotsky::printTarget() const {
-    // bitsets are usually printed according to the way in which the byte values are stored in memory
-    // therefore to print our visual representation we turn it into a string
-    std::string bits_str = getEmpty().to_string();
-
     std::cout << " Target Board " << std::endl;
     std::cout << "   A B C D " <<std::endl;
     std::cout << "   _ _ _ _ " <<std::endl;
@@ -200,6 +191,183 @@ std::bitset<25> Klotsky::shiftDownUnsafe(std::bitset<25> bitset) const {
 
 std::bitset<25> Klotsky::shiftUpUnsafe(std::bitset<25> bitset) const {
     return bitset << 5;
+}
+
+std::vector<Klotsky> Klotsky::generatePieceMoves(std::bitset<25> piece, Klotsky::Piece pieceType) {
+    //we create a copy to be modified.
+    Klotsky boardWithoutPiece = *this;
+    //first we remove the piece bits, so it become empty space.
+    boardWithoutPiece.removeBitsInAllBitsets(piece);
+
+    std::bitset<25> shiftedPiece = piece;
+    std::vector<Klotsky> generatedMoves;
+    for (int i = 0; i < 4; ++i) {
+        auto direction = static_cast<Direction>(i);
+        //now we add moves in the direction until the piece gets out of bounds or there is another piece blocking the move.
+        int j= 0;
+        while (true)
+        {
+            shiftedPiece = shiftDirectionUnsafe(shiftedPiece, direction);
+            //we check if the shifted piece moves to an empty space.
+            if((shiftedPiece & boardWithoutPiece.getEmpty()) == shiftedPiece)
+            {
+                std::cout << "looping... "<<  j  << std::endl;
+                Klotsky newMove = boardWithoutPiece;
+                newMove.addBits(shiftedPiece, pieceType);
+                //the move will assign its parent
+                newMove.parent = this;
+                generatedMoves.push_back(newMove);
+            }
+            else
+            {
+                break;
+            }
+            j++;
+        }
+    }
+    return generatedMoves;
+}
+
+std::vector<Klotsky> Klotsky::generateAllLegalMoves() {
+    std::vector<std::pair<std::bitset<25>, Piece>> bitsets = {
+            {bits_1X1_A, Piece::A_1X1},
+            {bits_1X1_B, Piece::B_1X1},
+            {bits_1X1_C, Piece::C_1X1},
+            {bits_1X1_D, Piece::D_1X1},
+            {bits_1X2, Piece::A_1X2},
+            {bits_2X1_A, Piece::A_2X1},
+            {bits_2X1_B, Piece::B_2X1},
+            {bits_2X1_C, Piece::C_2X1},
+            {bits_2X1_D, Piece::D_2X1},
+            {bits_2X2, Piece::A_2X2}
+    };
+
+    std::vector<Klotsky> generatedMoves;
+
+    for (const auto& [bitset, piece] : bitsets) {
+        auto pieceMoves = generatePieceMoves(bitset, piece);
+        generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+    }
+
+//
+//
+//       std::vector<Klotsky> generatedMoves;
+//
+//       auto pieceMoves = generatePieceMoves(bits_1X1_A, Piece::A_1X1);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//       pieceMoves = generatePieceMoves(bits_1X1_B, Piece::B_1X1);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//       pieceMoves = generatePieceMoves(bits_1X1_C);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//       pieceMoves = generatePieceMoves(bits_1X1_D);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//
+//       pieceMoves = generatePieceMoves(bits_1X2);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//
+//       pieceMoves = generatePieceMoves(bits_2X1_A);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//       pieceMoves = generatePieceMoves(bits_2X1_B);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//       pieceMoves = generatePieceMoves(bits_2X1_C);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//       pieceMoves = generatePieceMoves(bits_2X1_D);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+//
+//       pieceMoves = generatePieceMoves(bits_2X2);
+//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
+
+    return generatedMoves;
+}
+
+void Klotsky::removeBitsInAllBitsets(std::bitset<25> bits) {
+    bits_1X1_A ^= bits;
+    bits_1X1_B ^= bits;
+    bits_1X1_C ^= bits;
+    bits_1X1_D ^= bits;
+
+    bits_1X2 ^= bits;
+
+    bits_2X1_A ^= bits;
+    bits_2X1_B ^= bits;
+    bits_2X1_C ^= bits;
+    bits_2X1_D ^= bits;
+
+    bits_2X2 ^= bits;
+
+    // fix!?
+    //bits ^= bits_2X2;
+}
+
+void Klotsky::addBits(std::bitset<25> bits, Klotsky::Piece pieceToAdd) {
+    switch (pieceToAdd) {
+
+        case Piece::A_1X1:
+            bits_1X1_A |= bits;
+            break;
+        case Piece::B_1X1:
+            bits_1X1_B |= bits;
+            break;
+        case Piece::C_1X1:
+            bits_1X1_C |= bits;
+            break;
+        case Piece::D_1X1:
+            bits_1X1_D |= bits;
+            break;
+        case Piece::A_1X2:
+            bits_1X2 |= bits;
+            break;
+        case Piece::A_2X1:
+            bits_2X1_A |= bits;
+            break;
+        case Piece::B_2X1:
+            bits_2X1_B |= bits;
+            break;
+        case Piece::C_2X1:
+            bits_2X1_C |= bits;
+            break;
+        case Piece::D_2X1:
+            bits_2X1_D |= bits;
+            break;
+        case Piece::A_2X2:
+            bits_2X2 |= bits;
+            break;
+    }
+}
+
+void Klotsky::printO() const {
+
+    std::cout << " Target Board " << std::endl;
+    std::cout << "   A B C D " <<std::endl;
+    std::cout << "   _ _ _ _ " <<std::endl;
+    int row = 1;
+    int j = 0;
+
+    // Tablero Reverso
+    for (int i = 24; i >= 0; --i) {
+
+        if(j==0){
+            std::cout<< row << "| ";
+        }
+        if(i%5 != 0){
+
+            if(bits_2X2[i] != 0){
+                std::cout << " ";
+                std::cout << _2x2_char;
+            }
+            else{
+                std::cout << " ";
+            }
+        }
+
+        j++;
+        if(j==5){
+            j = 0;
+            row++;
+            std::cout<<std::endl;
+        }
+
+    }
 }
 
 
