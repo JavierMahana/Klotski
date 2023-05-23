@@ -2,6 +2,10 @@
 // Created by Javier on 18-05-2023.
 //
 
+#include <queue>
+#include <unordered_set>
+#include <algorithm>
+
 #include "Klotsky.h"
 
 
@@ -27,7 +31,7 @@ Klotsky::Klotsky(const Klotsky& other) {
     bits_2X1_C = other.bits_2X1_C;
     bits_2X1_D = other.bits_2X1_D;
     bits_2X2 = other.bits_2X2;
-    parent = nullptr;
+    parent = other.parent;
 }
 
 Klotsky& Klotsky::operator=(const Klotsky& other) {
@@ -46,6 +50,7 @@ Klotsky& Klotsky::operator=(const Klotsky& other) {
     bits_2X1_C = other.bits_2X1_C;
     bits_2X1_D = other.bits_2X1_D;
     bits_2X2 = other.bits_2X2;
+    parent = other.parent;
 
     return *this;
 }
@@ -233,9 +238,9 @@ std::bitset<25> Klotsky::shiftUpUnsafe(std::bitset<25> bitset) const {
     return bitset << 5;
 }
 
-std::vector<Klotsky> Klotsky::generatePieceMoves(std::bitset<25> piece, Klotsky::Piece pieceType) {
+std::vector<Klotsky> Klotsky::generatePieceMoves(Klotsky board, std::bitset<25> piece, Klotsky::Piece pieceType) {
     //we create a copy to be modified.
-    Klotsky boardWithoutPiece = *this;
+    Klotsky boardWithoutPiece = board;
     //first we remove the piece bits, so it become empty space.
     boardWithoutPiece.removeBits(piece, pieceType);
 
@@ -255,7 +260,7 @@ std::vector<Klotsky> Klotsky::generatePieceMoves(std::bitset<25> piece, Klotsky:
                 Klotsky newMove = boardWithoutPiece;
                 newMove.addBits(shiftedPiece, pieceType);
                 //the move will assign its parent
-                newMove.parent = this;
+                //newMove.parent = this;
                 generatedMoves.push_back(newMove);
             }
             else
@@ -267,7 +272,7 @@ std::vector<Klotsky> Klotsky::generatePieceMoves(std::bitset<25> piece, Klotsky:
     return generatedMoves;
 }
 
-std::vector<Klotsky> Klotsky::generateAllLegalMoves() {
+std::vector<Klotsky> Klotsky::generateAllLegalMoves(Klotsky board) {
     std::vector<std::pair<std::bitset<25>, Piece>> bitsets = {
             {bits_1X1_A, Piece::A_1X1},
             {bits_1X1_B, Piece::B_1X1},
@@ -284,38 +289,9 @@ std::vector<Klotsky> Klotsky::generateAllLegalMoves() {
     std::vector<Klotsky> generatedMoves;
 
     for (const auto& [bitset, piece] : bitsets) {
-        auto pieceMoves = generatePieceMoves(bitset, piece);
+        auto pieceMoves = generatePieceMoves(board,bitset, piece);
         generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
     }
-
-//
-//
-//       std::vector<Klotsky> generatedMoves;
-//
-//       auto pieceMoves = generatePieceMoves(bits_1X1_A, Piece::A_1X1);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//       pieceMoves = generatePieceMoves(bits_1X1_B, Piece::B_1X1);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//       pieceMoves = generatePieceMoves(bits_1X1_C);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//       pieceMoves = generatePieceMoves(bits_1X1_D);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//
-//       pieceMoves = generatePieceMoves(bits_1X2);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//
-//       pieceMoves = generatePieceMoves(bits_2X1_A);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//       pieceMoves = generatePieceMoves(bits_2X1_B);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//       pieceMoves = generatePieceMoves(bits_2X1_C);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//       pieceMoves = generatePieceMoves(bits_2X1_D);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-//
-//       pieceMoves = generatePieceMoves(bits_2X2);
-//       generatedMoves.insert(generatedMoves.end(), pieceMoves.begin(), pieceMoves.end());
-
     return generatedMoves;
 }
 
@@ -447,3 +423,78 @@ std::string Klotsky::directionToString(Klotsky::Direction direction) {
             return "Unknown";
     }
 }
+
+bool Klotsky::isGoalState() {
+    if(bits_2X2 == bits_Target)
+        return true;
+    else
+        return false;
+}
+
+
+std::vector<Klotsky>  Klotsky::solvePuzzleBFS(const Klotsky& initialState) {
+    std::queue<Klotsky> queue;
+    std::unordered_set<Klotsky, Klotsky::KlotskyHash, Klotsky::KlotskyEqual> visited;
+
+    queue.push(initialState);
+    visited.insert(initialState);
+
+    while (!queue.empty()) {
+
+        Klotsky current = queue.front();
+        queue.pop();
+
+        // Check if the current state is the goal state
+        if (current.isGoalState()) {
+            // Return the sequence of moves to reach the goal state
+            std::vector<Klotsky> solution;
+            while (current.parent != nullptr) {
+                solution.push_back(current);
+                current = *(current.parent);
+            }
+            std::reverse(solution.begin(), solution.end());
+
+            std::cout << " ---solution found---" << std::endl;
+            std::cout << "solution size: "<< solution.size() << std::endl;
+            std::cout << "visited size: "<< visited.size() << std::endl;
+
+            return solution;
+        }
+
+        // Generate all legal moves from the current state
+        std::vector<Klotsky> legalMoves = current.generateAllLegalMoves(current);
+        for (Klotsky& move : legalMoves) {
+            //if the move is not inside the visited list is a new move. We insert it.
+            if (visited.find(move) == visited.end()) {
+                move.parent = std::make_shared<Klotsky>(current);
+                queue.push(move);
+                visited.insert(move);
+            }
+        }
+    }
+
+    // No solution found
+    return std::vector<Klotsky>();
+}
+
+Klotsky::~Klotsky() {
+    //delete parent;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

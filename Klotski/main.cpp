@@ -59,12 +59,21 @@ int main() {
     k.print();
     k.printTarget();
 
-    auto allMoves = k.generateAllLegalMoves();
 
-    for (const auto& move : allMoves) {
+
+    auto solution = k.solvePuzzleBFS(k);
+
+    for (const auto& move : solution) {
         move.print();
         //move.printO(false, true);
     }
+//
+//    auto allMoves = k.generateAllLegalMoves();
+//
+//    for (const auto& move : allMoves) {
+//        move.print();
+//        //move.printO(false, true);
+//    }
 
 
     //TODO

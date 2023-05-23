@@ -5,10 +5,13 @@
 #ifndef KLOTSKI_KLOTSKY_H
 #define KLOTSKI_KLOTSKY_H
 
+#include <queue>
+#include <unordered_set>
 #include <vector>
 #include <iostream>
 #include <bitset>
 #include <array>
+#include <memory>
 
 class Klotsky{
 
@@ -23,7 +26,51 @@ public:
     Klotsky(const Klotsky& other);
     Klotsky& operator=(const Klotsky& other);
 
-    Klotsky* parent;
+    ~Klotsky();
+
+    //to enable the use of unordered sets.
+    //It doesn't use the parent for these operations.
+    struct KlotskyHash {
+        std::size_t operator()(const Klotsky& klotsky) const {
+            std::size_t hash = 0;
+            hash_combine(hash, klotsky.bits_1X1_A);
+            hash_combine(hash, klotsky.bits_1X1_B);
+            hash_combine(hash, klotsky.bits_1X1_C);
+            hash_combine(hash, klotsky.bits_1X1_D);
+            hash_combine(hash, klotsky.bits_1X2);
+            hash_combine(hash, klotsky.bits_2X1_A);
+            hash_combine(hash, klotsky.bits_2X1_B);
+            hash_combine(hash, klotsky.bits_2X1_C);
+            hash_combine(hash, klotsky.bits_2X1_D);
+            hash_combine(hash, klotsky.bits_2X2);
+            return hash;
+        }
+
+    private:
+        void hash_combine(std::size_t& seed, const std::bitset<25>& bits) const {
+            seed ^= bits.to_ulong() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+    };
+    struct KlotskyEqual {
+        bool operator()(const Klotsky& lhs, const Klotsky& rhs) const {
+            return lhs.bits_1X1_A == rhs.bits_1X1_A &&
+                   lhs.bits_1X1_B == rhs.bits_1X1_B &&
+                   lhs.bits_1X1_C == rhs.bits_1X1_C &&
+                   lhs.bits_1X1_D == rhs.bits_1X1_D &&
+                   lhs.bits_1X2 == rhs.bits_1X2 &&
+                   lhs.bits_2X1_A == rhs.bits_2X1_A &&
+                   lhs.bits_2X1_B == rhs.bits_2X1_B &&
+                   lhs.bits_2X1_C == rhs.bits_2X1_C &&
+                   lhs.bits_2X1_D == rhs.bits_2X1_D &&
+                   lhs.bits_2X2 == rhs.bits_2X2;
+        }
+    };
+
+
+public:
+    std::shared_ptr<Klotsky> parent;
+
+    //Klotsky* parent;
 
     enum class Direction {
         LEFT,
@@ -87,8 +134,12 @@ public:
     void removeBits(std::bitset<25> bits, Klotsky::Piece pieceToRemove);
 
 
-    std::vector<Klotsky> generateAllLegalMoves();
-    std::vector<Klotsky> generatePieceMoves(std::bitset<25> piece, Piece pieceType);
+    bool isGoalState();
+
+    std::vector<Klotsky> generateAllLegalMoves(Klotsky board);
+    std::vector<Klotsky> generatePieceMoves(Klotsky board, std::bitset<25> piece, Piece pieceType);
+
+    std::vector<Klotsky> solvePuzzleBFS(const Klotsky& initialState);
 
    //the difference in safe shift and unsafe is that the safe one removes the bits that are outside the board.
 
