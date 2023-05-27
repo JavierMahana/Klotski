@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "Klotsky.h"
+#include "NodeKlotsky.h"
 
 
 Klotsky::Klotsky(const std::bitset<25> &bits1X1A, const std::bitset<25> &bits1X1B, const std::bitset<25> &bits1X1C,
@@ -168,6 +169,11 @@ void Klotsky::printTarget() const {
 
     }
 }
+void Klotsky::printH() const
+{
+    int dx,dy = 0;
+    std::cout << " h = "<< calcH() << " |manhattan h = " << calcH_Manhattan(dy, dx) << " |blocking h = " << calcH_BlockingPieces(dy,dx) << " |manhattan2x1 h = " << calcH_Manhattan2x1() << std::endl;
+}
 
 std::bitset<25> Klotsky::shiftUp(std::bitset<25> bitset) const {
     return bitset << 5 & BOARD_MASK;
@@ -238,7 +244,7 @@ std::bitset<25> Klotsky::shiftUpUnsafe(std::bitset<25> bitset) const {
     return bitset << 5;
 }
 
-std::vector<Klotsky> Klotsky::generatePieceMoves(Klotsky board, std::bitset<25> piece, Klotsky::Piece pieceType) {
+std::vector<Klotsky> Klotsky::generatePieceMoves(Klotsky board, std::bitset<25> piece, Klotsky::Piece pieceType) const {
     //we create a copy to be modified.
     Klotsky boardWithoutPiece = board;
     //first we remove the piece bits, so it become empty space.
@@ -272,7 +278,7 @@ std::vector<Klotsky> Klotsky::generatePieceMoves(Klotsky board, std::bitset<25> 
     return generatedMoves;
 }
 
-std::vector<Klotsky> Klotsky::generateAllLegalMoves(Klotsky board) {
+std::vector<Klotsky> Klotsky::generateAllLegalMoves(Klotsky board) const {
     std::vector<std::pair<std::bitset<25>, Piece>> bitsets = {
             {bits_1X1_A, Piece::A_1X1},
             {bits_1X1_B, Piece::B_1X1},
@@ -424,7 +430,7 @@ std::string Klotsky::directionToString(Klotsky::Direction direction) {
     }
 }
 
-bool Klotsky::isGoalState() {
+bool Klotsky::isGoalState() const {
     if(bits_2X2 == bits_Target)
         return true;
     else
@@ -477,9 +483,167 @@ std::vector<Klotsky>  Klotsky::solvePuzzleBFS(const Klotsky& initialState) {
     return std::vector<Klotsky>();
 }
 
+std::vector<Klotsky> Klotsky::solvePuzzleAStar(const Klotsky &initialState) {
+    auto compare = [](const std::shared_ptr<NodeKlotsky>& a, const std::shared_ptr<NodeKlotsky>& b) {
+        return (a->getG() + a->getH()) > (b->getG() + b->getH());
+    };
+
+    //priority queue to order the open set
+    std::priority_queue<std::shared_ptr<NodeKlotsky>, std::vector<std::shared_ptr<NodeKlotsky>>, decltype(compare)> openSet(compare);
+    std::unordered_set<Klotsky, Klotsky::KlotskyHash, Klotsky::KlotskyEqual> closedSet;
+
+    std::shared_ptr<NodeKlotsky> initialNode = std::make_shared<NodeKlotsky>();
+    initialNode->board = initialState;
+    initialNode->setG(0);
+    initialNode->setH(initialNode->board.calcH());
+
+    initialNode->print();
+    //return std::vector<Klotsky>();
+
+    openSet.push(initialNode);
+
+    while (!openSet.empty()) {
+        std::shared_ptr<NodeKlotsky> currentNode = openSet.top();
+        openSet.pop();
+
+        const Klotsky& currentBoard = currentNode->board;
+
+        if (currentBoard.isGoalState()) {
+            // Reconstruct the path
+            std::vector<Klotsky> solution;
+            while (currentNode->parent != nullptr) {
+                solution.push_back(currentNode->board);
+                currentNode = currentNode->parent;
+            }
+            std::reverse(solution.begin(), solution.end());
+
+            std::cout << " ---solution found---" << std::endl;
+            std::cout << "solution size: "<< solution.size() << std::endl;
+            std::cout << "visited size: "<< closedSet.size() << std::endl;
+
+            return solution;
+        }
+
+        closedSet.insert(currentBoard);
+
+        std::vector<Klotsky> legalMoves = currentBoard.generateAllLegalMoves(currentBoard);
+        for (const Klotsky& move : legalMoves) {
+            std::shared_ptr<NodeKlotsky> newNode = std::make_shared<NodeKlotsky>();
+            newNode->board = move;
+            newNode->parent = currentNode;
+            newNode->setG(currentNode->getG() + 1);
+            newNode->setH(newNode->board.calcH());
+
+            //if the new move is not in the closed set we add it to the open set.
+            //falta chequear por duplicados!
+            if (closedSet.find(move) == closedSet.end()) {
+                openSet.push(newNode);
+                closedSet.insert(move);
+            }
+        }
+    }
+
+    // No solution found
+    return std::vector<Klotsky>();
+}
+
+
+
 Klotsky::~Klotsky() {
     //delete parent;
 }
+
+int Klotsky::calcH() const {
+    int distY = 0;
+    int distX = 0;
+    int hM = calcH_Manhattan(distY, distX);
+    int hB = calcH_BlockingPieces(distY, distX);
+
+    int manhattan2x1 = calcH_Manhattan2x1();
+
+    return  hB + hM + manhattan2x1;
+}
+
+int Klotsky::calcH_Manhattan(int& distY, int& distX) const {
+    auto shiftingBits = bits_2X2;
+    auto temp = shiftingBits;
+
+    while (temp.count() == 4)
+    {
+        temp = shiftDown(shiftingBits);
+
+        if(temp.count() >= 4)
+        {
+            shiftingBits = temp;
+            distY ++;
+        }
+
+    }
+
+    if(shiftingBits==bits_Target)
+        distX = 0;
+    else
+        distX = 1;
+
+
+    return distY + distX;
+}
+
+int Klotsky::calcH_BlockingPieces(int distY, int distX) const {
+    int blockedSquaresFromGoal = 0;
+    auto tempBoard = getFull() xor bits_2X2;
+    auto shiftingBits = bits_2X2;
+
+    for (int i = 0; i < distY; ++i)
+    {
+        shiftingBits = shiftDown(shiftingBits);
+
+        auto blockedBits = tempBoard & shiftingBits;
+        blockedSquaresFromGoal += blockedBits.count();
+        tempBoard &= ~blockedBits;
+    }
+    //this heuristic adds for
+
+    return blockedSquaresFromGoal;
+}
+
+int Klotsky::calcH_Manhattan2x1() const
+{
+
+    int manhattanDist = 0;
+    for (int i = 0; i < 4; ++i) {
+        std::bitset<25> shiftingBits;
+        if(i == 0)
+        {
+            shiftingBits = bits_2X1_A;
+        }else if(i == 1)
+        {
+            shiftingBits = bits_2X1_B;
+        }else if(i == 2)
+        {
+            shiftingBits = bits_2X1_C;
+        }else
+        {
+            shiftingBits = bits_2X1_D;
+        }
+
+        while (shiftingBits.count() == 2)
+        {
+            shiftingBits = shiftUp(shiftingBits);
+
+            if(shiftingBits.count() >= 2)
+            {
+                manhattanDist ++;
+            }
+
+        }
+    }
+    return manhattanDist;
+}
+
+Klotsky::Klotsky() = default;
+
+
 
 
 

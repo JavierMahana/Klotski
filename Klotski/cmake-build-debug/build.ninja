@@ -61,6 +61,12 @@ build CMakeFiles/Klotski.dir/Klotsky.cpp.obj: CXX_COMPILER__Klotski_Debug C$:/Us
   OBJECT_DIR = CMakeFiles\Klotski.dir
   OBJECT_FILE_DIR = CMakeFiles\Klotski.dir
 
+build CMakeFiles/Klotski.dir/NodeKlotsky.cpp.obj: CXX_COMPILER__Klotski_Debug C$:/Users/Javier/Documentos/GitHub/Klotski/Klotski/NodeKlotsky.cpp || cmake_object_order_depends_target_Klotski
+  DEP_FILE = CMakeFiles\Klotski.dir\NodeKlotsky.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\Klotski.dir
+  OBJECT_FILE_DIR = CMakeFiles\Klotski.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Klotski
@@ -69,7 +75,7 @@ build CMakeFiles/Klotski.dir/Klotsky.cpp.obj: CXX_COMPILER__Klotski_Debug C$:/Us
 #############################################
 # Link the executable Klotski.exe
 
-build Klotski.exe: CXX_EXECUTABLE_LINKER__Klotski_Debug CMakeFiles/Klotski.dir/main.cpp.obj CMakeFiles/Klotski.dir/Klotsky.cpp.obj
+build Klotski.exe: CXX_EXECUTABLE_LINKER__Klotski_Debug CMakeFiles/Klotski.dir/main.cpp.obj CMakeFiles/Klotski.dir/Klotsky.cpp.obj CMakeFiles/Klotski.dir/NodeKlotsky.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\Klotski.dir

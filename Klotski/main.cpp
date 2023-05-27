@@ -57,15 +57,44 @@ int main() {
     Klotsky k = Klotsky(start_bits_1X1_A, start_bits_1X1_B, start_bits_1X1_C,start_bits_1X1_D, start_bits_1X2, start_bits_2X1_A,start_bits_2X1_B,start_bits_2X1_C,start_bits_2X1_D,start_bits_2x2);
     std::cout << " Welcome to Klotsky: " <<std::endl;
     k.print();
+    k.printH();
     k.printTarget();
 
+    bool printAllMoves = false;
+
+    bool doBFS = false;
+    bool doAStar = true;
+
+    if(doAStar){
+
+        auto solutionAStar = k.solvePuzzleAStar(k);
 
 
-    auto solution = k.solvePuzzleBFS(k);
+        if(printAllMoves)
+        {
+            for (const auto& move : solutionAStar) {
+                move.print();
+            }
+        } else
+        {
+            solutionAStar.back().print();
+        }
+    }
 
-    for (const auto& move : solution) {
-        move.print();
-        //move.printO(false, true);
+
+    if (doBFS)
+    {
+        auto solution = k.solvePuzzleBFS(k);
+
+        if(printAllMoves)
+        {
+            for (const auto& move : solution) {
+                move.print();
+            }
+        } else
+        {
+            solution.back().print();
+        }
     }
 //
 //    auto allMoves = k.generateAllLegalMoves();

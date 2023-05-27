@@ -13,7 +13,7 @@
 #include <array>
 #include <memory>
 
-class Klotsky{
+class Klotsky {
 
     //The board is a 4X5 board. But the bitset requieres an extra column to generate a correct bitshift.
 
@@ -22,16 +22,18 @@ public:
             const std::bitset<25> &bits1X1D, const std::bitset<25> &bits1X2, const std::bitset<25> &bits2X1A,
             const std::bitset<25> &bits2X1B, const std::bitset<25> &bits2X1C, const std::bitset<25> &bits2X1D,
             const std::bitset<25> &bits2X2);
+    Klotsky();
 
-    Klotsky(const Klotsky& other);
-    Klotsky& operator=(const Klotsky& other);
+    Klotsky(const Klotsky &other);
+
+    Klotsky &operator=(const Klotsky &other);
 
     ~Klotsky();
 
     //to enable the use of unordered sets.
     //It doesn't use the parent for these operations.
     struct KlotskyHash {
-        std::size_t operator()(const Klotsky& klotsky) const {
+        std::size_t operator()(const Klotsky &klotsky) const {
             std::size_t hash = 0;
             hash_combine(hash, klotsky.bits_1X1_A);
             hash_combine(hash, klotsky.bits_1X1_B);
@@ -47,12 +49,13 @@ public:
         }
 
     private:
-        void hash_combine(std::size_t& seed, const std::bitset<25>& bits) const {
+        void hash_combine(std::size_t &seed, const std::bitset<25> &bits) const {
             seed ^= bits.to_ulong() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         }
     };
+
     struct KlotskyEqual {
-        bool operator()(const Klotsky& lhs, const Klotsky& rhs) const {
+        bool operator()(const Klotsky &lhs, const Klotsky &rhs) const {
             return lhs.bits_1X1_A == rhs.bits_1X1_A &&
                    lhs.bits_1X1_B == rhs.bits_1X1_B &&
                    lhs.bits_1X1_C == rhs.bits_1X1_C &&
@@ -91,12 +94,12 @@ public:
         A_2X2
     };
 
-    const std::bitset<25> BOARD_MASK {
-        "11110"
-        "11110"
-        "11110"
-        "11110"
-        "11110"};
+    const std::bitset<25> BOARD_MASK{
+            "11110"
+            "11110"
+            "11110"
+            "11110"
+            "11110"};
 
     /// Target is a 2x2 block!
     const std::bitset<25> bits_Target{
@@ -105,6 +108,13 @@ public:
             "00000"
             "01100"
             "01100"};
+
+    const std::bitset<25> bits_2x1Target{
+            "11110"
+            "11110"
+            "00000"
+            "00000"
+            "00000"};
 
     std::bitset<25> bits_1X1_A;
     std::bitset<25> bits_1X1_B;
@@ -117,6 +127,10 @@ public:
     std::bitset<25> bits_2X1_D;
     std::bitset<25> bits_2X2;
 
+
+
+
+
     const char empty_char = ' ';
     const char _1x1_char = 'A';
     const char _1x2_char = 'B';
@@ -125,23 +139,35 @@ public:
     const char target_char = 'X';
 
 
+    std::bitset<25> getFull() const { return
+                (bits_1X1_A | bits_1X1_B | bits_1X1_C | bits_1X1_D | bits_1X2 | bits_2X1_A | bits_2X1_B | bits_2X1_C |
+                 bits_2X1_D | bits_2X2) & BOARD_MASK;
+    }
 
+    std::bitset<25> getEmpty() const { return getFull().flip() & BOARD_MASK; };
 
-    std::bitset<25> getFull () const { return (bits_1X1_A | bits_1X1_B | bits_1X1_C | bits_1X1_D | bits_1X2 | bits_2X1_A | bits_2X1_B | bits_2X1_C | bits_2X1_D | bits_2X2) & BOARD_MASK;}
-    std::bitset<25> getEmpty () const {return getFull().flip() & BOARD_MASK;};
+    void addBits(std::bitset<25> bits, Piece pieceToAdd);
 
-    void addBits(std::bitset<25>bits, Piece pieceToAdd);
     void removeBits(std::bitset<25> bits, Klotsky::Piece pieceToRemove);
 
 
-    bool isGoalState();
+    bool isGoalState() const;
 
-    std::vector<Klotsky> generateAllLegalMoves(Klotsky board);
-    std::vector<Klotsky> generatePieceMoves(Klotsky board, std::bitset<25> piece, Piece pieceType);
+    int calcH() const;
+    int calcH_Manhattan2x1() const;
+
+    int calcH_Manhattan(int& distY, int& distX) const;
+    int calcH_BlockingPieces(int distY, int distX) const;
+
+    std::vector<Klotsky> generateAllLegalMoves(Klotsky board) const;
+    std::vector<Klotsky> generatePieceMoves(Klotsky board, std::bitset<25> piece, Klotsky::Piece pieceType) const;
 
     std::vector<Klotsky> solvePuzzleBFS(const Klotsky& initialState);
+    // A* algorithm implementation
 
-   //the difference in safe shift and unsafe is that the safe one removes the bits that are outside the board.
+    std::vector<Klotsky> solvePuzzleAStar(const Klotsky& initialState);
+
+    //the difference in safe shift and unsafe is that the safe one removes the bits that are outside the board.
 
     std::string getStringOfType(Piece pieceType);
     std::string directionToString(Direction direction);
@@ -162,6 +188,11 @@ public:
     void print() const;
     void printTarget() const;
     void printO(bool show0, bool showA) const;
+    void printH() const;
+
+
+
+
 
 };
 
