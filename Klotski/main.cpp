@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include "Klotsky.h"
 
 int main() {
@@ -58,17 +59,41 @@ int main() {
     std::cout << " Welcome to Klotsky: " <<std::endl;
     k.print();
     k.printH();
-    k.printTarget();
 
     bool printAllMoves = false;
 
+    bool play = false;
     bool doBFS = false;
-    bool doAStar = true;
+    bool doAStar = false;
+    bool doIDA = true;
+
+
+    if(doIDA){
+
+        auto start = std::chrono::high_resolution_clock::now();
+        auto solutionIDA = k.solvePuzzleIDAStar(k);
+
+
+        if(printAllMoves)
+        {
+            for (const auto& move : solutionIDA) {
+                move.print();
+            }
+        } else
+        {
+            solutionIDA.back().print();
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        std::cout << "IDA Solution time: " << duration << " milliseconds" << std::endl;
+    }
+
 
     if(doAStar){
 
+        auto start = std::chrono::high_resolution_clock::now();
         auto solutionAStar = k.solvePuzzleAStar(k);
-
 
         if(printAllMoves)
         {
@@ -78,12 +103,18 @@ int main() {
         } else
         {
             solutionAStar.back().print();
+
         }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        std::cout << "AStar Solution time: " << duration << " milliseconds" << std::endl;
     }
 
 
     if (doBFS)
     {
+        auto start = std::chrono::high_resolution_clock::now();
         auto solution = k.solvePuzzleBFS(k);
 
         if(printAllMoves)
@@ -95,14 +126,150 @@ int main() {
         {
             solution.back().print();
         }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        std::cout << "BFS Solution time: " << duration << " milliseconds" << std::endl;
+
     }
-//
-//    auto allMoves = k.generateAllLegalMoves();
-//
-//    for (const auto& move : allMoves) {
-//        move.print();
-//        //move.printO(false, true);
-//    }
+
+
+    if(play){
+        std::cout << "-----------------------" <<std::endl;
+        std::cout << "      USER PLAYS" <<std::endl;
+        std::cout << "DIRECTIONS:" << std::endl;
+        std::cout << "  Left: l" <<   std::endl;
+        std::cout << "  Right: r" <<  std::endl;
+        std::cout << "  Up: u" <<   std::endl;
+        std::cout << "  Down: d" <<   std::endl;
+        std::cout << "  Change piece: z" << std::endl;
+        std::cout << "OBJECTIVE: The O Piece must reach the target Board" << std::endl;
+        k.printTarget();
+        std::cout << std::endl;
+
+        std::vector<Klotsky> move;
+        std::bitset<25> pieceToMove;
+        Klotsky::Direction direction;
+        Klotsky mask;
+        char input;
+        bool playing = true;
+
+        while(playing)
+        {
+            k.print();
+
+            bool pieceSet = false;
+            bool directionSet = false;
+            move.clear();
+
+
+            // Selection of the piece to move
+            while (!pieceSet){
+                std::cout << "Enter the piece that you want to move: ";
+                std::cin >> input;
+
+                switch(input){
+                    case '1': pieceToMove = k.bits_1X1_A;
+                        move = k.generatePieceMoves(k, k.bits_1X1_A, Klotsky::Piece::A_1X1);
+                        break;
+                    case '2': pieceToMove = k.bits_1X1_B;
+                        move = k.generatePieceMoves(k, k.bits_1X1_B, Klotsky::Piece::B_1X1);
+                        break;
+                    case '3': pieceToMove = k.bits_1X1_C;
+                        move = k.generatePieceMoves(k, k.bits_1X1_C, Klotsky::Piece::C_1X1);
+                        break;
+                    case '4': pieceToMove = k.bits_1X1_D;
+                        move = k.generatePieceMoves(k, k.bits_1X1_D, Klotsky::Piece::D_1X1);
+                        break;
+                    case 'A': pieceToMove = k.bits_1X2;
+                        move = k.generatePieceMoves(k, k.bits_1X2, Klotsky::Piece::A_1X2);
+                        break;
+                    case 'B': pieceToMove = k.bits_2X1_A;
+                        move = k.generatePieceMoves(k, k.bits_2X1_A, Klotsky::Piece::A_2X1);
+                        break;
+                    case 'C': pieceToMove = k.bits_2X1_B;
+                        move = k.generatePieceMoves(k, k.bits_2X1_B, Klotsky::Piece::B_2X1);
+                        break;
+                    case 'D': pieceToMove = k.bits_2X1_C;
+                        move = k.generatePieceMoves(k, k.bits_2X1_C, Klotsky::Piece::C_2X1);
+                        break;
+                    case 'E': pieceToMove = k.bits_2X1_D;
+                        move = k.generatePieceMoves(k, k.bits_2X1_D, Klotsky::Piece::D_2X1);
+                        break;
+                    case 'O': pieceToMove = k.bits_2X2;
+                        move = k.generatePieceMoves(k, k.bits_2X2, Klotsky::Piece::A_2X2);
+                        break;
+
+                    default:
+                        std::cout << "Invalid input entered try. ";
+                        break;
+                }
+
+                std::cin.clear();
+
+                if(!move.empty()){
+                    pieceSet = true;
+                }
+                else{
+                    std::cout << "Invalid, that piece cannot move. ";
+                }
+            }
+
+            // Selection of shift
+            while (!directionSet){
+
+                std::cout << "Enter your direction: ";
+                std::cin >> input;
+
+                switch(input){
+                    case 'l': direction = Klotsky::Direction::LEFT;
+                        break;
+                    case 'r': direction = Klotsky::Direction::RIGHT;
+                        break;
+                    case 'u': direction = Klotsky::Direction::UP;
+                        break;
+                    case 'd': direction = Klotsky::Direction::DOWN;
+                        break;
+                    case 'z':
+                        move.clear();
+                        directionSet = true;
+                        break;
+                    default:
+                        std::cout << "Invalid input entered try one of the available moves: ";
+                        std::cout << "Left: l" <<   std::endl;
+                        std::cout << "Right: r" <<  std::endl;
+                        std::cout << "Up: u" <<   std::endl;
+                        std::cout << "Down: d" <<   std::endl;
+                        break;
+                }
+
+                std::cin.clear();
+
+                //Check if the direction allow a legal move
+                mask = k;
+                mask.shiftDirection(pieceToMove, direction);
+
+                for (const auto& element : move) {
+                    // if the move is legal
+                    if(element.getFull() == mask.getFull()){
+                        directionSet = true;
+                        break;
+                    }
+                }
+                if(!directionSet){
+                    std::cout << "Invalid move there is a piece on the way!";
+                }
+            }
+
+            // Make the move
+            if(!move.empty()){
+                k = mask;
+            }
+
+            playing = k.isGoalState();
+        }
+
+        std::cout << "Well played you've won!!!" <<   std::endl;
+    }
 
 
     //TODO

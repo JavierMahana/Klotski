@@ -56,35 +56,48 @@ Klotsky& Klotsky::operator=(const Klotsky& other) {
     return *this;
 }
 
+
+bool Klotsky::operator==(const Klotsky &other) const {
+
+    if(
+    bits_1X1_A == other.bits_1X1_A &&
+    bits_1X1_B == other.bits_1X1_B &&
+    bits_1X1_C == other.bits_1X1_C &&
+    bits_1X1_D == other.bits_1X1_D &&
+    bits_1X2 == other.bits_1X2 &&
+    bits_2X1_A == other.bits_2X1_A &&
+    bits_2X1_C == other.bits_2X1_C &&
+    bits_2X1_D == other.bits_2X1_D &&
+    bits_2X2 == other.bits_2X2 &&
+    parent == other.parent)
+        return true;
+    else
+        return false;
+}
+
+
 void Klotsky::print() const {
-    std::cout << " Klotsky Board " << std::endl;
-    std::cout << "   A B C D " <<std::endl;
-    std::cout << "   _ _ _ _ " <<std::endl;
-    int row = 1;
+    std::cout << "_____________" << std::endl;
+    std::cout << "KLOTSKY BOARD" << std::endl;
     int j = 0;
 
     // Tablero
     for (int i = 24; i >= 0; --i) {
 
-        if(j==0){
-            std::cout<< row << "|";
-        }
         if(i%5 != 0){
 
             std::cout << " ";
 
-            if(bits_2X2[i] != 0){
-                std::cout << _2x2_char;
-            }
-            else if(bits_1X2[i] != 0){
-                std::cout << _1x2_char;
-            }
-            else if(bits_1X1_A[i] != 0 || bits_1X1_B[i] != 0 || bits_1X1_C[i] != 0 || bits_1X1_D[i] != 0){
-                std::cout << _1x1_char;
-            }
-            else if(bits_2X1_A[i] != 0 || bits_2X1_B[i] != 0 || bits_2X1_C[i] != 0 || bits_2X1_D[i] != 0){
-                std::cout << _2x1_char;
-            }
+            if(bits_2X2[i] != 0) std::cout << _2x2_char;
+            else if(bits_1X2[i] != 0)  std::cout << _1x2_char;
+            else if(bits_1X1_A[i] != 0 ) std::cout << _1x1_Achar;
+            else if(bits_1X1_B[i] != 0 ) std::cout << _1x1_Bchar;
+            else if(bits_1X1_C[i] != 0 ) std::cout << _1x1_Cchar;
+            else if(bits_1X1_D[i] != 0 ) std::cout << _1x1_Dchar;
+            else if(bits_2X1_A[i] != 0 )  std::cout << _2x1_Achar;
+            else if(bits_2X1_B[i] != 0 )  std::cout << _2x1_Bchar;
+            else if(bits_2X1_C[i] != 0 )  std::cout << _2x1_Cchar;
+            else if(bits_2X1_D[i] != 0 )  std::cout << _2x1_Dchar;
             else{
                 std::cout << empty_char;
             }
@@ -93,33 +106,27 @@ void Klotsky::print() const {
         j++;
         if(j==5){
             j = 0;
-            row++;
             std::cout<<std::endl;
         }
     }
+
 }
 void Klotsky::printO(bool show0, bool showA) const {
 
-    std::cout << " Target Board " << std::endl;
-    std::cout << "   A B C D " <<std::endl;
-    std::cout << "   _ _ _ _ " <<std::endl;
-    int row = 1;
+    std::cout << "____________" << std::endl;
+    std::cout << "TARGET BOARD" << std::endl;
     int j = 0;
 
     // Tablero Reverso
     for (int i = 24; i >= 0; --i) {
 
-        if(j==0){
-            std::cout<< row << "| ";
-        }
         if(i%5 != 0){
 
-
-            if(show0 && bits_2X2[i] != 0){
-                std::cout << _2x2_char;
-            }else if(showA && bits_1X1_A[i] != 0 || bits_1X1_B[i] != 0 || bits_1X1_C[i] != 0 || bits_1X1_D[i] != 0 ){
-                std::cout << _1x1_char;
-            }
+            if(bits_2X2[i] != 0) std::cout << _2x2_char;
+            else if(bits_1X1_A[i] != 0 ) std::cout << _1x1_Achar;
+            else if(bits_1X1_B[i] != 0 ) std::cout << _1x1_Bchar;
+            else if(bits_1X1_C[i] != 0 ) std::cout << _1x1_Cchar;
+            else if(bits_1X1_D[i] != 0 ) std::cout << _1x1_Dchar;
             else{
                 std::cout << " ";
             }
@@ -130,48 +137,44 @@ void Klotsky::printO(bool show0, bool showA) const {
         j++;
         if(j==5){
             j = 0;
-            row++;
             std::cout<<std::endl;
         }
 
     }
+
 }
 void Klotsky::printTarget() const {
-    std::cout << " Target Board " << std::endl;
-    std::cout << "   A B C D " <<std::endl;
-    std::cout << "   _ _ _ _ " <<std::endl;
-    int row = 1;
+    std::cout << "____________" << std::endl;
+    std::cout << "TARGET BOARD" << std::endl;
     int j = 0;
 
     // Tablero Reverso
     for (int i = 24; i >= 0; --i) {
 
-        if(j==0){
-            std::cout<< row << "| ";
-        }
         if(i%5 != 0){
 
+            std::cout << " ";
             if(bits_Target[i] != 0){
-                std::cout << " ";
                 std::cout << target_char;
             }
             else{
-                std::cout << " ";
+                std::cout << empty_char;
             }
         }
+
 
         j++;
         if(j==5){
             j = 0;
-            row++;
             std::cout<<std::endl;
         }
-
     }
 }
 void Klotsky::printH() const
 {
     int dx,dy = 0;
+    std::cout << "__________" << std::endl;
+    std::cout << "Heuristics:" << std::endl;
     std::cout << " h = "<< calcH() << " |manhattan h = " << calcH_Manhattan(dy, dx) << " |blocking h = " << calcH_BlockingPieces(dy,dx) << " |manhattan2x1 h = " << calcH_Manhattan2x1() << std::endl;
 }
 
@@ -208,7 +211,6 @@ std::bitset<25> Klotsky::shiftDirection(std::bitset<25> bitset, Klotsky::Directi
     }
 
 }
-
 
 std::bitset<25> Klotsky::shiftDirectionUnsafe(std::bitset<25> bitset, Klotsky::Direction direction) const {
     switch (direction)
@@ -437,7 +439,6 @@ bool Klotsky::isGoalState() const {
         return false;
 }
 
-
 std::vector<Klotsky>  Klotsky::solvePuzzleBFS(const Klotsky& initialState) {
     std::queue<Klotsky> queue;
     std::unordered_set<Klotsky, Klotsky::KlotskyHash, Klotsky::KlotskyEqual> visited;
@@ -547,11 +548,7 @@ std::vector<Klotsky> Klotsky::solvePuzzleAStar(const Klotsky &initialState) {
     return std::vector<Klotsky>();
 }
 
-
-
-Klotsky::~Klotsky() {
-    //delete parent;
-}
+Klotsky::~Klotsky() = default;
 
 int Klotsky::calcH() const {
     int distY = 0;
@@ -577,15 +574,9 @@ int Klotsky::calcH_Manhattan(int& distY, int& distX) const {
             shiftingBits = temp;
             distY ++;
         }
-
     }
 
-    if(shiftingBits==bits_Target)
-        distX = 0;
-    else
-        distX = 1;
-
-
+    distX = (shiftingBits == bits_Target) ? 0 : 1;
     return distY + distX;
 }
 
@@ -602,14 +593,26 @@ int Klotsky::calcH_BlockingPieces(int distY, int distX) const {
         blockedSquaresFromGoal += blockedBits.count();
         tempBoard &= ~blockedBits;
     }
-    //this heuristic adds for
+
+    if (distX != 0) {
+        std::bitset<25> tempCopy = shiftingBits;
+        shiftLeft(tempCopy);
+        if (tempCopy == bits_Target) {
+            auto blockedBits = tempBoard & tempCopy;
+            blockedSquaresFromGoal += blockedBits.count();
+        } else {
+            shiftRight(shiftingBits);
+            auto blockedBits = tempBoard & shiftingBits;
+            blockedSquaresFromGoal += blockedBits.count();
+        }
+    }
 
     return blockedSquaresFromGoal;
 }
 
+//No admisible
 int Klotsky::calcH_Manhattan2x1() const
 {
-
     int manhattanDist = 0;
     for (int i = 0; i < 4; ++i) {
         std::bitset<25> shiftingBits;
@@ -635,10 +638,122 @@ int Klotsky::calcH_Manhattan2x1() const
             {
                 manhattanDist ++;
             }
-
         }
     }
     return manhattanDist;
+}
+
+std::vector<Klotsky> Klotsky::solvePuzzleIDAStar(const Klotsky &initialState) {
+
+
+    int visitedSize = 0;
+
+    int depthLimit = initialState.calcH();
+
+    int iterations = 1;
+
+    std::unordered_set<std::pair<int, Klotsky>, PairHash, PairEqual> visited;
+
+    while (true) {
+        std::vector<Klotsky> path;
+
+        //Optimization: The visited list works to prevent the repetition of moves. It is not complete now (needs to check fot the g value).
+
+        std::cout << "Iteration : "<< iterations << " | depth search: " << depthLimit <<" | visited size: " << visited.size() << std::endl;
+        iterations++;
+
+        auto searchResult = depthLimitedSearch(initialState, visited, path, 0, depthLimit);
+
+        //visitedSize += visited.size();
+        //visited.clear();
+
+        if (searchResult == -1)
+        {
+            std::cout << " ---solution found---" << std::endl;
+            std::cout << "solution size: "<< path.size() << std::endl;
+            std::cout << "visited size: "<< visitedSize << std::endl;
+
+            return path;
+        }
+        else
+        {
+            depthLimit = searchResult;
+        }
+
+        if(depthLimit > 99999999)
+        {
+            std::cout << "IDA NOT FOUND" << std::endl;
+            return {};
+        }
+
+         // Increase the depth limit if the solution was not found
+    }
+
+    // No solution found
+    return {};
+}
+
+
+//returns -1 if found
+int Klotsky::depthLimitedSearch(const Klotsky &state, std::unordered_set<std::pair<int, Klotsky>, PairHash, PairEqual> &visited, std::vector<Klotsky> &path,
+                                 int g, int depthLimit) {
+
+    int f = g + state.calcH();
+
+    visited.emplace(g, state);
+    path.push_back(state);
+
+    if (state.isGoalState()) {
+        return -1; // Solution found
+    }
+
+    if (f > depthLimit) {
+        return f; // Reached the g limit without finding the solution
+    }
+
+    int min = INT_MAX;
+
+    //bool solutionFound = false;
+
+    std::vector<Klotsky> legalMoves = state.generateAllLegalMoves(state);
+
+    //Optimization. Sort the legal moves, so it checks the most promising first.
+    std::sort(legalMoves.begin(), legalMoves.end(), [](const Klotsky& move1, const Klotsky& move2) {
+        return move1.calcH() < move2.calcH();
+    });
+
+    for (const auto& move : legalMoves)
+    {
+
+        auto elementOnVisited =  visited.find({g, move});
+        if (elementOnVisited != visited.end())
+        {
+            if(elementOnVisited->first > g+1)
+            {
+                //if is greater it means that we should continue expanding and replace the value of the open list.
+                //std::remove(visited.begin(), visited.end(),{g, move});
+                visited.erase(elementOnVisited++);
+            }
+            else
+            {//otherwise we skip the node
+                continue;
+            }
+        }
+
+        //We expand the search.
+        int searchSolution = depthLimitedSearch(move, visited, path, g + 1, depthLimit);
+        if (searchSolution == -1) {
+            return -1; // Solution found, stop the search
+        }
+        if(searchSolution < min)
+            min = searchSolution;
+
+    }
+
+    // Remove the current state from the path
+    path.pop_back();
+
+    return min; // Solution not found at this g level
 }
 
 Klotsky::Klotsky() = default;
@@ -655,6 +770,108 @@ Klotsky::Klotsky() = default;
 
 
 
+
+
+//this version finds a solution fast. But a very large one: solution size: 38434
+//visited size: 5503713
+//std::vector<Klotsky> Klotsky::solvePuzzleIDAStar(const Klotsky &initialState) {
+//
+//
+//    int visitedSize = 0;
+//
+//    int depthLimit = initialState.calcH();
+//
+//    while (true) {
+//        //Optimization: The visited list works to prevent the repetition of moves. It is not complete now (needs to check fot the g value).
+//
+//        std::unordered_set<std::pair<int, Klotsky>, PairHash, PairEqual> visited;
+//        //std::unordered_set<Klotsky, KlotskyHash, KlotskyEqual> visited;
+//        std::vector<Klotsky> path;
+//
+//        auto searchResult = depthLimitedSearch(initialState, visited, path, 0, depthLimit);
+//
+//        visitedSize += visited.size();
+//        visited.clear();
+//
+//        if (searchResult == -1)
+//        {
+//            std::cout << " ---solution found---" << std::endl;
+//            std::cout << "solution size: "<< path.size() << std::endl;
+//            std::cout << "visited size: "<< visitedSize << std::endl;
+//
+//            return path;
+//        }
+//        else
+//        {
+//            depthLimit = searchResult;
+//        }
+//
+//        if(depthLimit > 300)
+//        {
+//            std::cout << "IDA NOT FOUND" << std::endl;
+//            return {};
+//        }
+//
+//        // Increase the depth limit if the solution was not found
+//    }
+//
+//    // No solution found
+//    return {};
+//}
+//
+//
+////returns -1 if found
+//int Klotsky::depthLimitedSearch(const Klotsky &state, std::unordered_set<std::pair<int, Klotsky>, PairHash, PairEqual> &visited, std::vector<Klotsky> &path,
+//                                int g, int depthLimit) {
+//
+//    //std::cout << "iteration" << std::endl;
+//    int f = g + state.calcH();
+//
+//    visited.emplace(g, state);
+//    //visited.insert(std::make_pair(g, state));
+//    path.push_back(state);
+//
+//    if (state.isGoalState()) {
+//        return -1; // Solution found
+//    }
+//
+//    if (f > depthLimit) {
+//        return f; // Reached the g limit without finding the solution
+//    }
+//
+//    int min = INT_MAX;
+//
+//    //bool solutionFound = false;
+//
+//    std::vector<Klotsky> legalMoves = state.generateAllLegalMoves(state);
+//
+//    //Optimization. Sort the legal moves, so it checks the most promising first.
+//    std::sort(legalMoves.begin(), legalMoves.end(), [](const Klotsky& move1, const Klotsky& move2) {
+//        return move1.calcH() < move2.calcH();
+//    });
+//
+//    for (const auto& move : legalMoves) {
+//
+//        auto elementOnVisited = visited.find (std::make_pair(g, move));
+//
+//        if (elementOnVisited == visited.end())
+//        {
+//            int searchSolution = depthLimitedSearch(move, visited, path, g + 1, depthLimit);
+//            if (searchSolution == -1) {
+//                return -1; // Solution found, stop the search
+//            }
+//            if(searchSolution < min)
+//                min = searchSolution;
+//
+//        }
+//
+//    }
+//
+//    // Remove the current state from the path
+//    path.pop_back();
+//
+//    return min; // Solution not found at this g level
+//}
 
 
 

@@ -28,6 +28,8 @@ public:
 
     Klotsky &operator=(const Klotsky &other);
 
+    bool operator==(const Klotsky& other) const;
+
     ~Klotsky();
 
     //to enable the use of unordered sets.
@@ -48,12 +50,15 @@ public:
             return hash;
         }
 
+    ~KlotskyHash() = default;
+        //transform to string to generate the hash.
     private:
-        void hash_combine(std::size_t &seed, const std::bitset<25> &bits) const {
-            seed ^= bits.to_ulong() + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        void hash_combine(std::size_t& seed, const std::bitset<25>& bits) const {
+            std::string bitsString = bits.to_string();
+            seed ^= std::hash<std::string>{}(bitsString) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         }
     };
-
+public:
     struct KlotskyEqual {
         bool operator()(const Klotsky &lhs, const Klotsky &rhs) const {
             return lhs.bits_1X1_A == rhs.bits_1X1_A &&
@@ -66,6 +71,24 @@ public:
                    lhs.bits_2X1_C == rhs.bits_2X1_C &&
                    lhs.bits_2X1_D == rhs.bits_2X1_D &&
                    lhs.bits_2X2 == rhs.bits_2X2;
+        }
+    };
+
+    //hash only the second element
+    struct PairHash {
+        template <typename T1, typename T2>
+        std::size_t operator()(const std::pair<T1, T2>& pair) const {
+            //std::size_t h1 = std::hash<T1>{}(pair.first);
+            std::size_t h2 = std::hash<T2>{}(pair.second);
+            return h2;
+        }
+    };
+
+    //only the second element too
+    struct PairEqual {
+        template <typename T1, typename T2>
+        bool operator()(const std::pair<T1, T2>& pair1, const std::pair<T1, T2>& pair2) const {
+            return pair1.second == pair2.second;
         }
     };
 
@@ -128,13 +151,16 @@ public:
     std::bitset<25> bits_2X2;
 
 
-
-
-
-    const char empty_char = ' ';
-    const char _1x1_char = 'A';
-    const char _1x2_char = 'B';
-    const char _2x1_char = 'C';
+    const char empty_char = '.';
+    const char _1x1_Achar = '1';
+    const char _1x1_Bchar = '2';
+    const char _1x1_Cchar = '3';
+    const char _1x1_Dchar = '4';
+    const char _1x2_char = 'A';
+    const char _2x1_Achar = 'B';
+    const char _2x1_Bchar = 'C';
+    const char _2x1_Cchar = 'D';
+    const char _2x1_Dchar = 'E';
     const char _2x2_char = 'O';
     const char target_char = 'X';
 
@@ -149,7 +175,6 @@ public:
     void addBits(std::bitset<25> bits, Piece pieceToAdd);
 
     void removeBits(std::bitset<25> bits, Klotsky::Piece pieceToRemove);
-
 
     bool isGoalState() const;
 
@@ -166,6 +191,11 @@ public:
     // A* algorithm implementation
 
     std::vector<Klotsky> solvePuzzleAStar(const Klotsky& initialState);
+
+    std::vector<Klotsky> solvePuzzleIDAStar(const Klotsky& initialState);
+
+    int depthLimitedSearch(const Klotsky& state, std::unordered_set<std::pair<int, Klotsky>, PairHash, PairEqual>& visited,
+                            std::vector<Klotsky>& path, int g, int depthLimit);
 
     //the difference in safe shift and unsafe is that the safe one removes the bits that are outside the board.
 
@@ -190,12 +220,16 @@ public:
     void printO(bool show0, bool showA) const;
     void printH() const;
 
-
-
-
-
 };
 
-
-
+// Specialization of std::hash for Klotsky
+namespace std {
+    template<>
+    struct hash<Klotsky> {
+        std::size_t operator()(const Klotsky& klotsky) const {
+            Klotsky::KlotskyHash hasher;
+            return hasher(klotsky);
+        }
+    };
+}
 #endif //KLOTSKI_KLOTSKY_H
