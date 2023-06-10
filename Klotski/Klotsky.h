@@ -132,12 +132,6 @@ public:
             "01100"
             "01100"};
 
-    const std::bitset<25> bits_2x1Target{
-            "11110"
-            "11110"
-            "00000"
-            "00000"
-            "00000"};
 
     std::bitset<25> bits_1X1_A;
     std::bitset<25> bits_1X1_B;
@@ -178,35 +172,35 @@ public:
 
     bool isGoalState() const;
 
-    int calcH() const;
+    int calcH(bool admissible) const;
     int calcH_Manhattan2x1() const;
 
     int calcH_Manhattan(int& distY, int& distX) const;
     int calcH_BlockingPieces(int distY, int distX) const;
 
-    std::vector<Klotsky> generateAllLegalMoves(Klotsky board) const;
-    std::vector<Klotsky> generatePieceMoves(Klotsky board, std::bitset<25> piece, Klotsky::Piece pieceType) const;
+    std::vector<Klotsky> generateAllLegalMoves(const Klotsky& board) const;
+    std::vector<Klotsky> generatePieceMoves(const Klotsky& board, std::bitset<25> piece, Klotsky::Piece pieceType) const;
 
-    std::vector<Klotsky> solvePuzzleBFS(const Klotsky& initialState);
+    static std::vector<Klotsky> solvePuzzleBFS(const Klotsky& initialState);
     // A* algorithm implementation
 
-    std::vector<Klotsky> solvePuzzleAStar(const Klotsky& initialState);
+    static std::vector<Klotsky> solvePuzzleAStar(const Klotsky& initialState, bool admissible);
 
-    std::vector<Klotsky> solvePuzzleIDAStar(const Klotsky& initialState);
+    std::vector<Klotsky> solvePuzzleIDAStar(const Klotsky& initialState, bool admissible, bool withTransposition);
 
     int depthLimitedSearch(const Klotsky& state, std::unordered_set<std::pair<int, Klotsky>, PairHash, PairEqual>& visited,
-                            std::vector<Klotsky>& path, int g, int depthLimit);
+                            std::vector<Klotsky>& path, int g, int depthLimit,  bool admissible, bool withTransposition);
 
     //the difference in safe shift and unsafe is that the safe one removes the bits that are outside the board.
 
-    std::string getStringOfType(Piece pieceType);
-    std::string directionToString(Direction direction);
+    static std::string getStringOfType(Piece pieceType);
+    static std::string directionToString(Direction direction);
 
-    std::bitset<25> shiftUpUnsafe(std::bitset<25> bitset) const;
-    std::bitset<25> shiftDownUnsafe(std::bitset<25> bitset) const;
-    std::bitset<25> shiftLeftUnsafe(std::bitset<25> bitset) const;
-    std::bitset<25> shiftRightUnsafe(std::bitset<25> bitset) const;
-    std::bitset<25> shiftDirectionUnsafe(std::bitset<25> bitset, Klotsky::Direction direction) const;
+    static std::bitset<25> shiftUpUnsafe(std::bitset<25> bitset) ;
+    static std::bitset<25> shiftDownUnsafe(std::bitset<25> bitset) ;
+    static std::bitset<25> shiftLeftUnsafe(std::bitset<25> bitset) ;
+    static std::bitset<25> shiftRightUnsafe(std::bitset<25> bitset) ;
+    static std::bitset<25> shiftDirectionUnsafe(std::bitset<25> bitset, Klotsky::Direction direction) ;
 
 
     std::bitset<25> shiftDirection(std::bitset<25> bitset, Direction direction) const;
@@ -217,8 +211,7 @@ public:
 
     void print() const;
     void printTarget() const;
-    void printO(bool show0, bool showA) const;
-    void printH() const;
+    void printH(bool admissible) const;
 
 };
 
